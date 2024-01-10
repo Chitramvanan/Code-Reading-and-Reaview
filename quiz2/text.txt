@@ -1,0 +1,11 @@
+This is a little text file that we'll use to get some experience with Git.
+
+Git will treat this file just like any other text file. Remember, a file's extension does not affect its contents: a .cpp file is a text file, for example. A text file is just any file that contains text.
+
+In the modern world, text is made of Unicode codepoints. Files, in general, are made of bits; some sequences of bits are Unicode codepoints, but not all sequences of bits are Unicode codepoints. This is the difference between a text file and a binary file.
+
+Your operating system uses the extension of a file to decide which application to use when opening the file; this also does not affect the contents of the file. You can rename this file to text.jpeg and your operating system might try to open it in a picture viewer, but the file will still be a text file. You'll still be able to open it in a text editor and see the text content.
+
+When you're writing a program that opens a file, you usually have to choose weather to open the file in binary mode or text mode. When a program opens a file in binary mode, the program gets a view of the raw bits in the file. When a program opens a file in text mode, the operating system decodes the bits into Unicode codepoints, and the application gets a view of the Unicode codepoints in the file.
+
+Text is fundamental to the field of software development, so it's very important to understand how it actually works!

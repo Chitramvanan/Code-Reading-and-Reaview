@@ -1,0 +1,168 @@
+To work with the new AgentBehavior type, we need to refactor the code in Agent.ts and GameRunner.ts to implement the AgentBehavior interface for each player (A, B, C, and D). 
+This will involve making changes in both modules.
+
+In Agent.ts:
+1. Modify the agentMove function to individual classes for each Agent that implement AgentBehavior and then define the agentMove for each of them individually
+
+// Current code:
+// screenPart is a 5x5 window with the agent in the center
+export function agentMove(player: Player, screenPart: ScreenPart): Motion {
+  switch (player) {
+    case "A": { // always move right
+      return "right";
+    }
+    case "B": { // always random
+      return randomMotion(screenPart);
+    }
+
+    case "C": { // cycle through the moves in cCycle
+      const c: Motion = cCycle[cIndex];
+      cIndex++;
+      cIndex = cIndex % cCycle.length;
+      return c;
+    }
+
+    case "D": { // go for any nearby apple, otherwise random
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+          if (screenPart[j][i] == "apple") {
+            if (i > 3) return "right";
+            else if (i < 3) return "left";
+            else if (j > 3) return "down";
+            else if (j < 3) return "up";
+          }
+        }
+      }
+      return randomMotion(screenPart);
+    }
+  }
+}
+
+// Refactor to:
+export class RightAgent implements AgentBehavior {
+  agentName(): Player {
+    return "A";
+  }
+
+  agentMove(screenPart: ScreenPart): Motion {
+    return "right";
+  }
+}
+
+export class TuesdayAgent implements AgentBehavior {
+  agentName(): Player {
+    return "B";
+  }
+
+  agentMove(screenPart: ScreenPart): Motion {
+    return randomMotion(screenPart);
+  }
+}
+
+export class CycleAgent implements AgentBehavior {
+  private cCycle: Motion[] = ["up", "up", "right", "down", "right"];
+  private cIndex: number;
+
+  constructor() {
+    this.cIndex = 0;
+  }
+
+  agentName(): Player {
+    return "C";
+  }
+
+  agentMove(screenPart: ScreenPart): Motion {
+    const c: Motion = this.cCycle[this.cIndex];
+    this.cIndex++;
+    this.cIndex = this.cIndex % this.cCycle.length;
+    return c;
+  }
+}
+
+export class StairAgent implements AgentBehavior {
+  agentName(): Player {
+    return "D";
+  }
+
+  agentMove(screenPart: ScreenPart): Motion {
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        if (i > 3) return "right";
+        else if (i < 3) return "left";
+        else if (j > 3) return "down";
+        else if (j < 3) return "up";
+      }
+    }
+    return randomMotion(screenPart);
+  }
+}
+
+
+2. Remove the initializeAgent code from Agent.ts
+// Current code:
+export function initializeAgent(player: Player): void {
+  // ...
+}
+
+
+In GameRunner.ts:
+1.Modify the run function to remove initializeAgent and instead declare const for each agent:
+// Current code:
+export function run(stepTime: number, newApplesEachStep: number, screen: GameScreen): void {
+  initializeAgent("A");
+  initializeAgent("B");
+  initializeAgent("C");
+  initializeAgent("D");
+  .....
+}
+
+// Refactor to
+export function run(stepTime: number, newApplesEachStep: number, screen: GameScreen): void {
+  const agentA = new RightAgent();
+  const agentB = new TuesdayAgent();
+  const agentC = new CycleAgent();
+  const agentD = new StairAgent();
+ ......
+}
+2. Modify the step function to add all agents as arguments 
+// Current code:
+export function step(
+  stepTime: number,
+  .....
+  snakeD: SnakeState
+)
+//Refactor to
+ export function step(
+  stepTime: number,
+  .......
+  snakeD: SnakeState,
+  agentA: RightAgent,
+  agentB: TuesdayAgent
+  agentC: CycleAgent,
+  agentD: StairAgent
+)
+ 
+ 3. Add a function called updatePosition to include the steps that is taken by each snake when it has not still lost
+// Current code
+  if (!snakeA.lost) {
+    const temp = locationAfterMotion(agentMove("A", getScreenPart(screen, snakeA)), snakeA);
+    ......
+  }
+ 
+  //Refactor to
+ 
+if (!snakeA.lost) {
+    updatePosition(agentA, screen, snakeA)
+  }
+
+  if (!snakeB.lost) {
+    updatePosition(agentB, screen, snakeB)
+  }
+ .......
+
+
+ export function updatePosition(agent: AgentSnakeA | AgentSnakeB | AgentSnakeC | AgentSnakeD, 
+  screen: GameScreen, snake: SnakeState): void {
+  const temp = locationAfterMotion(agent.agentMove(getScreenPart(screen, snake)), snake);
+    ........
+}

@@ -1,0 +1,37 @@
+Updated Plan:
+
+Agent.ts
+1.Move the agent interface to this file from AgentType.ts. Delete AgentType.ts.
+2.Add the new agents such as RightAgent, CycleAgent, TuesdayAgent and StairAgent in this file insted of keeping seperate files for each agent.  
+
+GameRunner.ts
+1.Import all agents and agent types from Agent.ts
+2.Insted of declaring agents individually, create an array of agents that hold instances of different agent classes
+ const agents: AgentBehavior[] = [<AgentBehavior>new RightAgent(), <AgentBehavior>new TuesdayAgent(), <AgentBehavior>new CycleAgent(), <AgentBehavior>new StairAgent()];
+3. As we had removed initializeAgent function, create array that hold elements of player types
+ const playerNames: Player[] = ["A", "B", "C", "D"];
+ The player's names and agent instance are used together to control each player's movement in the game
+ For example: players[0] corresponds to player A and agents[0] corresponds to the agent that controls player A
+4.Create a new function plotMove and isEdgeofScreen for functional abstraction to be used effectively in updatePosition function
+5.Update the function name step to runGameStep and variable name stepTime to waitTimeInMilliseconds as part of code refactoring
+6.Create new function generateApples for functional abstraction and use it in the runGameStep function 
+function generateApples(newApplesEachStep: number, screen: GameScreen): void {
+  // generate new apples
+  for (let i = 0; i < newApplesEachStep; i++) {
+    // random integers in the closed range [0, screen.length]
+    const x = Math.floor(Math.random() * screen.length);
+    const y = Math.floor(Math.random() * screen.length);
+    // if we generated coordinates that aren't empty, skip this apple
+    if (screen[y][x] == "empty")
+      screen[y][x] = "apple";
+  }
+}
+7.Further refactored runGameStep to include a sub-function rotatePlayersInOrder for updating player position
+8.Created a new function updateSnakeStats to optimize original code
+function updateSnakeStats(playerNames: Player[], snakes: SnakeState[]): void {
+  for (let i = 0; i < snakes.length; i++) {
+    updateLost(playerNames[i], snakes[i].lost);
+    updateApples(playerNames[i], snakes[i].apples);
+  }
+}
+9.Created a newfunction gameIsNotOver to check that snake has not lost before continuing the next step in runGameStep
